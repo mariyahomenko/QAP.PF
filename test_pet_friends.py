@@ -120,7 +120,7 @@ def test_successful_update_self_pet_info(name='ждвылжавыж', animal_typ
         raise Exception("There is no my pets")
 
 #и негативное обновление
-def test_unsuccessful_update_self_pet_info(name='ждвылжавыж', animal_type='длыдво', age='-3'):
+def test_unsuccessful_update_self_pet_info(name='ждвылжавыж', animal_type='длыдво', age='-3'):  #!
     _, auth_key = pf.get_api_key(valid_email, valid_password)
     _, my_pets = pf.get_list_of_pets(auth_key, "my_pets")
     if len(my_pets['pets']) > 0:
