@@ -146,6 +146,8 @@ def test_simple_add_new_pet_with_unvalid_data(name='Гриля', animal_type='0'
     assert status == 400
     assert result['name'] != name
 
+
+
 def test_add_photo_with_valid_data(pet_photo='images/w400h300.jpg'):
     pet_photo = os.path.join(os.path.dirname(__file__), pet_photo)  #определяем фото
     _, auth_key = pf.get_api_key(valid_email, valid_password)   #получаем кей
