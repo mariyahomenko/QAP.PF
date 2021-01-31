@@ -18,12 +18,20 @@ def test_get_api_key_for_invalid_pass(email=valid_email, password=invalid_passwo
     assert status == 403
     assert result == 403
 
-#а тут норм пароль, но инвалидное мыло
+#а тут норм пароль, но инвалидное мыло, чтобы наверняка убедиться, что пропускаются только верные комбинации
 #как и выше, проверяем, что юзер получит код из документации
-def test_get_api_key_for_invalid_user(email=invalid_email, password=valid_password):
+def test_get_api_key_for_invalid_email(email=invalid_email, password=valid_password):
     status, result = pf.get_api_key(email, password)
     assert status == 403
     assert result == 403
+
+#ниже опять этот гет, но для инвалидной пары
+def test_get_api_key_for_invalid_user(email=invalid_email, password=invalid_password):
+    status, result = pf.get_api_key(email, password)
+    assert status == 403
+    assert result == 403
+
+
 
 #ниже ф-ия для списка питомцев
 #получаем ключ, запрашиваем список и проверяем, что ответ 200 и список не пустой
@@ -32,6 +40,20 @@ def test_get_all_pets_with_valid_key(filter=''):    #сейчас там дос�
     status, result = pf.get_list_of_pets(auth_key, filter)
     assert status == 200
     assert len(result['pets']) > 0
+
+#и ее функция-сестричка с инвалидными данными
+#мы не получим статус, потому что мы не получим ключ, чтобы подставить его в get_list, поэтому криво ифаем
+def test_get_all_pets_with_invalid_key(filter=''):
+    _, auth_key = pf.get_api_key(invalid_email, invalid_password)
+    if auth_key is not str:
+        raise Exception("no")
+    else:
+        status, result = pf.get_list_of_pets(auth_key, filter)
+        assert status == 403
+        assert len(result['pets']) == 0
+
+
+
 
 #добавление нового питомца
 #в 1й строке задаем валидные данные, во 2й как-то так:
@@ -52,9 +74,13 @@ def test_add_new_pet_with_invalid_data(name='Гриля', animal_type='двор�
     assert status == 400
     assert result['name'] != name   #проверяем откат, тип того
 
+
+
 #и тут еще можно написать тестов по другим параметрам, да и вообще -
 #надо функцию делать динамической, понимаю и стыжусь, но хочу спать
 #вообще как-нибудь потом переделаю все портфолио на .эмодзи (будет хотя бы красиво, раз не круто с:)
+
+
 
 #тестируем удаление
 def test_successful_delete_self_pet():
@@ -76,7 +102,9 @@ def test_unsuccessful_delete_self_pet():
     pet_id = 'ghost'  #тут мог бы быть ключ с индексами из брутфорса или тип того
     status, _ = pf.delete_pet(auth_key, pet_id)
     _, my_pets = pf.get_list_of_pets(auth_key, "my_pets")
-    assert status == 400    #там нет ошибки на случай удаления несуществующего, но пусть так
+    assert status == 403    #там нет ошибки на случай удаления несуществующего, но пусть так
+
+
 
 #обновление инфы о питомце
 #работает, если список не пуст, меняет первого зверя в списке
@@ -91,12 +119,43 @@ def test_successful_update_self_pet_info(name='ждвылжавыж', animal_typ
     else:
         raise Exception("There is no my pets")
 
-#не хватает 1 теста, поэтому ниже еще одна халтура
+#и негативное обновление
+def test_unsuccessful_update_self_pet_info(name='ждвылжавыж', animal_type='длыдво', age='-3'):
+    _, auth_key = pf.get_api_key(valid_email, valid_password)
+    _, my_pets = pf.get_list_of_pets(auth_key, "my_pets")
+    if len(my_pets['pets']) > 0:
+        status, result = pf.update_pet_info(auth_key, my_pets['pets'][0]['id'], name, animal_type, age)
+        assert status == 400
+        assert result['name'] != name
+    else:
+        raise Exception("There is no my pets")
+#тест провалится и инфа обновится, хотя так быть не должно
+
+
+#не хватает 3 тестов, поэтому ниже еще немного халтуры
 
 def test_simple_add_new_pet_with_valid_data(name='Гриля', animal_type='двортерьер', age='4'):
     _, auth_key = pf.get_api_key(valid_email, valid_password)
     status, result = pf.add_new_pet_without_photo(auth_key, name, animal_type, age)    #добавляем всю инфу
     assert status == 200    #проверяем ответ от сервера, что все ок
     assert result['name'] == name   #и что хотя бы имя у нового питомца Гриля
+
+def test_simple_add_new_pet_with_unvalid_data(name='Гриля', animal_type='0', age='4'):
+    _, auth_key = pf.get_api_key(valid_email, valid_password)
+    status, result = pf.add_new_pet_without_photo(auth_key, name, animal_type, age)
+    assert status == 400
+    assert result['name'] != name
+
+def test_add_photo_with_valid_data(pet_photo='images/w400h300.jpg'):
+    pet_photo = os.path.join(os.path.dirname(__file__), pet_photo)  #определяем фото
+    _, auth_key = pf.get_api_key(valid_email, valid_password)   #получаем кей
+    _, my_pets = pf.get_list_of_pets(auth_key, "my_pets")   #получаем список зверей
+    if len(my_pets['pets']) > 0:    #если больше нуля
+        pet_id = my_pets['pets'][0]['id']   #то берем айди первого
+        status, result = pf.add_photo_of_pet(auth_key, pet_id, pet_photo)   #добавляем фото
+        assert status == 200
+        assert result['pet_photo'] == pet_photo
+    else:
+        raise Exception("There is no my pets")  #иначе ругаемся
 
 #еще тут надо будет проверить неверные типы, размеры, табы на пробелы заменить, что-то умное придумать или хз
