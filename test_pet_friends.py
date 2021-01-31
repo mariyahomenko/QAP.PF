@@ -2,12 +2,12 @@ from api import PetFriends  #берем из файла класс
 from settings import valid_email, valid_password, invalid_email, invalid_password    #из другого файла - данные
 import os   #встроенная управлялка файлами, нужна здесь для пикч
 
-pf = PetFriends() #прост переименовываем
+pf = PetFriends() #просто переименовываем
 
 #ниже блок с простеньким тестом для валидного юзера
 #типа получил ли он ответ кодом 200 + есть ли в результе кей
 def test_get_api_key_for_valid_user(email=valid_email, password=valid_password):
-    status, result = pf.get_api_key(email, password)
+    status, result = pf.get_api_key(email, password)    #гет в файле api
     assert status == 200
     assert 'key' in result
 
@@ -54,7 +54,6 @@ def test_get_all_pets_with_invalid_key(filter=''):
 
 
 
-
 #добавление нового питомца
 #в 1й строке задаем валидные данные, во 2й как-то так:
 #имя = "я джойн и собираюсь поставить слеш между (получаем директорию до файла) и (имя файла)"
@@ -66,7 +65,7 @@ def test_add_new_pet_with_valid_data(name='Гриля', animal_type='дворт�
     assert result['name'] == name   #и что хотя бы имя у нового питомца Гриля
 
 #тоже добавление, но с некорректными данными
-#насколько помню, там возраст от -1 до 4, пусть так, крч простите за ленивый тест
+#насколько помню, там возраст от -1 до 4, пусть так
 def test_add_new_pet_with_invalid_data(name='Гриля', animal_type='двортерьер', age='40', pet_photo='images/4837_fullimage.jpg'):
     pet_photo = os.path.join(os.path.dirname(__file__), pet_photo)
     _, auth_key = pf.get_api_key(valid_email, valid_password)
@@ -76,8 +75,6 @@ def test_add_new_pet_with_invalid_data(name='Гриля', animal_type='двор�
 
 
 
-#и тут еще можно написать тестов по другим параметрам, да и вообще -
-#надо функцию делать динамической, понимаю и стыжусь, но хочу спать
 #вообще как-нибудь потом переделаю все портфолио на .эмодзи (будет хотя бы красиво, раз не круто с:)
 
 
@@ -132,19 +129,19 @@ def test_unsuccessful_update_self_pet_info(name='ждвылжавыж', animal_t
 #тест провалится и инфа обновится, хотя так быть не должно
 
 
-#не хватает 3 тестов, поэтому ниже еще немного халтуры
 
+#не хватает 3 тестов, поэтому ниже еще немного халтуры
 def test_simple_add_new_pet_with_valid_data(name='Гриля', animal_type='двортерьер', age='4'):
     _, auth_key = pf.get_api_key(valid_email, valid_password)
-    status, result = pf.add_new_pet_without_photo(auth_key, name, animal_type, age)    #добавляем всю инфу
-    assert status == 200    #проверяем ответ от сервера, что все ок
-    assert result['name'] == name   #и что хотя бы имя у нового питомца Гриля
+    status, result = pf.add_new_pet_without_photo(auth_key, name, animal_type, age)
+    assert status == 200
+    assert result['name'] == name
 
 def test_simple_add_new_pet_with_unvalid_data(name='Гриля', animal_type='0', age='4'):
     _, auth_key = pf.get_api_key(valid_email, valid_password)
     status, result = pf.add_new_pet_without_photo(auth_key, name, animal_type, age)
     assert status == 400
-    assert result['name'] != name
+    assert result['name'] != name   #можно тип проверить, но вдруг добавится имя, а тип, например, будет пустым, - будет дырявая карточка
 
 
 
@@ -160,4 +157,15 @@ def test_add_photo_with_valid_data(pet_photo='images/w400h300.jpg'):
     else:
         raise Exception("There is no my pets")  #иначе ругаемся
 
-#еще тут надо будет проверить неверные типы, размеры, табы на пробелы заменить, что-то умное придумать или хз
+#дополнительная сестричка-простушка:
+def test_add_photo_with_valid_data(pet_photo='blala.gif'): #или вообще .txt (хотя не знаю, имеет ли смысл)
+    pet_photo = os.path.join(os.path.dirname(__file__), pet_photo)
+    _, auth_key = pf.get_api_key(valid_email, valid_password)
+    _, my_pets = pf.get_list_of_pets(auth_key, "my_pets")
+    if len(my_pets['pets']) > 0:
+        pet_id = my_pets['pets'][0]['id']
+        status, result = pf.add_photo_of_pet(auth_key, pet_id, pet_photo)
+        assert status == 400    #или 403
+        assert result['pet_photo'] != pet_photo
+    else:
+        raise Exception("There is no my pets")
