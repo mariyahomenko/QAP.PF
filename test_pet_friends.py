@@ -89,7 +89,7 @@ def test_successful_delete_self_pet():
     if len(my_pets['pets']) == 0:   #если длина джсона соответствует 0
         pf.add_new_pet(auth_key, "Скумби", "кот", '3', "images/w400h300.jpg") #то добавляем инфу о новом питомце
         _, my_pets = pf.get_list_of_pets(auth_key, "my_pets")   #просим список питомцев, теперь уж не 0
-    pet_id = my_pets['pets'][0]['id']   #обзываем айди, идем к джону, берем первыЙ (0й) айди из списка
+    pet_id = my_pets['pets'][0]['id']   #обзываем айди, идем к джсону, берем первыЙ (0й) айди из списка
     status, _ = pf.delete_pet(auth_key, pet_id) #запрашиваем удаление
     _, my_pets = pf.get_list_of_pets(auth_key, "my_pets")   #запрашиваем список питомцев
     assert status == 200
