@@ -75,10 +75,6 @@ def test_add_new_pet_with_invalid_data(name='Гриля', animal_type='двор�
 
 
 
-#вообще как-нибудь потом переделаю все портфолио на .эмодзи (будет хотя бы красиво, раз не круто с:)
-
-
-
 #тестируем удаление
 def test_successful_delete_self_pet():
     _, auth_key = pf.get_api_key(valid_email, valid_password)   #гетим ключ
@@ -130,7 +126,7 @@ def test_unsuccessful_update_self_pet_info(name='ждвылжавыж', animal_t
 
 
 
-#не хватает 3 тестов, поэтому ниже еще немного халтуры
+#нниже подобная халтура
 def test_simple_add_new_pet_with_valid_data(name='Гриля', animal_type='двортерьер', age='4'):
     _, auth_key = pf.get_api_key(valid_email, valid_password)
     status, result = pf.add_new_pet_without_photo(auth_key, name, animal_type, age)
