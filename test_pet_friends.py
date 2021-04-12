@@ -4,6 +4,24 @@ import os   #встроенная управлялка файлами, нужн�
 
 pf = PetFriends() #просто переименовываем
 
+#class TestTwenty_six:
+#
+#    @pytest.fixture(autouse=True)
+#    def get_key(self):
+#        self.pf = PetFriends()
+#        status, self.key = self.pf.get_api_key(valid_email, valid_password)
+#        assert status == 200
+#        assert 'key' in self.key
+#
+#        yield
+#
+#        assert self.status == 200
+#
+#    def test_get_all_pets_with_valid_key(self, filter=''):
+#        self.status, result = self.pf.get_list_of_pets(self.key, filter)
+#
+#        assert len(result['pets']) > 0
+
 #ниже блок с простеньким тестом для валидного юзера
 #типа получил ли он ответ кодом 200 + есть ли в результе кей
 def test_get_api_key_for_valid_user(email=valid_email, password=valid_password):
